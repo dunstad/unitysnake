@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.Tilemaps;
 
 // TODO: collide with walls
 // TODO: queue movement
@@ -9,6 +10,8 @@ public class PlayerMovement : MonoBehaviour
 {
     public Vector2 direction;
     public Rigidbody2D rb;
+    public Tilemap collidable;
+
     Camera cam;
 
     // Start is called before the first frame update
@@ -72,8 +75,6 @@ public class PlayerMovement : MonoBehaviour
                     int relativeX = (int) (touchWorldPos.x - rb.position.x);
                     int relativeY = (int) (touchWorldPos.y - rb.position.y);
 
-                    // Debug.Log("rbX " + rb.position.x + " - rbY " + rb.position.y);
-
                     // up
                     if (relativeY >= 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
                     {
@@ -101,12 +102,6 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
         }
-    }
-
-    void FixedUpdate()
-    {
-        // movement
-        // rb.MovePosition(rb.position + (direction * 0.1f));
     }
 
     void MoveSnake()

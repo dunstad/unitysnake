@@ -890,7 +890,7 @@ GameObject:
   - component: {fileID: 283408365}
   - component: {fileID: 283408364}
   m_Layer: 0
-  m_Name: Tilemap
+  m_Name: Walkable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2595,6 +2595,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   direction: {x: 0, y: 0}
   rb: {fileID: 401879637}
+  collidable: {fileID: 254042039}
 --- !u!50 &401879637
 Rigidbody2D:
   serializedVersion: 4
@@ -2603,7 +2604,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 401879633}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
@@ -2847,7 +2848,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1da9919cc8355e54393427b4cbb16d01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tileMap: {fileID: 283408365}
+  walkable: {fileID: 283408365}
 --- !u!1 &1965748524
 GameObject:
   m_ObjectHideFlags: 0

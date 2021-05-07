@@ -7,21 +7,19 @@ using UnityEngine.Tilemaps;
 // TODO: rebuild locations every move
 public class FoodCollider : MonoBehaviour
 {
-    public Tilemap tileMap;
+    public Tilemap walkable;
     List<Vector2> locations;
 
     void Start()
     {
         locations = new List<Vector2>();
-        for (int i = tileMap.origin.x; i < tileMap.origin.x + tileMap.size.x; i++)
+        for (int i = walkable.origin.x; i < walkable.origin.x + walkable.size.x; i++)
         {
-            for (int j = tileMap.origin.y; j < tileMap.origin.y + tileMap.size.y; j++)
+            for (int j = walkable.origin.y; j < walkable.origin.y + walkable.size.y; j++)
             {
-                Debug.Log("i: " + i + ", j: " + j);
-                Sprite? sprite = tileMap.GetSprite(new Vector3Int (i, j, 0));
-                if (!(sprite is null) && sprite.name == "colored_tilemap_15")
+                Sprite? sprite = walkable.GetSprite(new Vector3Int (i, j, 0));
+                if (sprite != null)
                 {
-                    Debug.Log(sprite.name);
                     locations.Add(new Vector2(i, j));
                 }
             }
