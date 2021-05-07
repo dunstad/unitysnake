@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+// TODO: collide with walls
+// TODO: queue movement
 public class PlayerMovement : MonoBehaviour
 {
-    public float moveSpeed = 1f;
-    public int tileSize = 8;
     public Vector2 direction;
     public Rigidbody2D rb;
     Camera cam;
