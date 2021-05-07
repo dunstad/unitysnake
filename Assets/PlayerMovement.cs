@@ -4,11 +4,10 @@ using UnityEngine;
 using System;
 using UnityEngine.Tilemaps;
 
-// TODO: collide with walls
 // TODO: queue movement
 public class PlayerMovement : MonoBehaviour
 {
-    public Vector2 direction;
+    public Vector2Int direction;
     public Rigidbody2D rb;
     public Tilemap collidable;
 
@@ -106,7 +105,21 @@ public class PlayerMovement : MonoBehaviour
 
     void MoveSnake()
     {
-        rb.MovePosition(rb.position + direction);
+        var nextPos = new Vector3Int();
+        nextPos.x = (int)rb.position.x + direction.x;
+        nextPos.y = (int)rb.position.y + direction.y;
+        nextPos.z = 0;
+        // new Vector3Int(rb.position.x + direction.x, rb.position.y + direction.y
+        Sprite? sprite = collidable.GetSprite(nextPos);
+        if (sprite is null)
+        {
+            rb.MovePosition(rb.position + direction);
+        }
+        else
+        {
+            Debug.Log("u ded");
+            Destroy(gameObject);
+        }
     }
 }
 
