@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using System;
 using UnityEngine.Tilemaps;
 
@@ -32,12 +33,54 @@ public class PlayerMovement : MonoBehaviour
         // input
 
         // handle keyboard/gamepad input
-        float axisX = Input.GetAxisRaw("Horizontal");
-        float axisY = Input.GetAxisRaw("Vertical");
-        if ((axisX != 0) || (axisY != 0))
+        // up
+        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
+            if ((inputs.Count == 0) || (lastInput != Vector2Int.up))
+            {
+                lastInput = new Vector2Int(0, 1);
+                inputs.Enqueue(new Vector2Int(0, 1));
+            }
+        }
+        // down
+        else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
+        {
+            if ((inputs.Count == 0) || (lastInput != Vector2Int.down))
+            {
+                lastInput = new Vector2Int(0, -1);
+                inputs.Enqueue(new Vector2Int(0, -1));
+            }
+        }
+        // right
+        else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
+        {
+            if ((inputs.Count == 0) || (lastInput != Vector2Int.right))
+            {
+                lastInput = new Vector2Int(1, 0);
+                inputs.Enqueue(new Vector2Int(1, 0));
+            }
+        }
+        // left
+        else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
+        {
+            if ((inputs.Count == 0) || (lastInput != Vector2Int.left))
+            {
+                lastInput = new Vector2Int(-1, 0);
+                inputs.Enqueue(new Vector2Int(-1, 0));
+            }
+        }
+
+        // Handle screen touches.
+        if (Touchscreen.current.primaryTouch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+        {
+            var touchPosition = Touchscreen.current.position.ReadValue();
+            Vector3 touchWorldPos = cam.ScreenToWorldPoint(touchPosition);
+
+            int relativeX = (int) (touchWorldPos.x - rb.position.x);
+            int relativeY = (int) (touchWorldPos.y - rb.position.y);
+
             // up
-            if (axisY >= 0 && (Math.Abs(axisY) > Math.Abs(axisX)))
+            if (relativeY >= 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
             {
                 if ((inputs.Count == 0) || (lastInput != Vector2Int.up))
                 {
@@ -46,7 +89,7 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
             // down
-            else if (axisY < 0 && (Math.Abs(axisY) > Math.Abs(axisX)))
+            else if (relativeY < 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
             {
                 if ((inputs.Count == 0) || (lastInput != Vector2Int.down))
                 {
@@ -55,7 +98,7 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
             // right
-            else if (axisX >= 0 && (Math.Abs(axisX) > Math.Abs(axisY)))
+            else if (relativeX >= 0 && (Math.Abs(relativeX) > Math.Abs(relativeY)))
             {
                 if ((inputs.Count == 0) || (lastInput != Vector2Int.right))
                 {
@@ -70,62 +113,6 @@ public class PlayerMovement : MonoBehaviour
                 {
                     lastInput = new Vector2Int(-1, 0);
                     inputs.Enqueue(new Vector2Int(-1, 0));
-                }
-            }
-        }
-
-        // Handle screen touches.
-        if (Input.touchCount > 0)
-        {
-            Touch touch = Input.GetTouch(0);
-
-            if (Input.touchCount == 1)
-            {
-
-                if (touch.phase == TouchPhase.Began)
-                {
-                    Vector3 touchPosition = touch.position;
-                    Vector3 touchWorldPos = cam.ScreenToWorldPoint(touchPosition);
-
-                    int relativeX = (int) (touchWorldPos.x - rb.position.x);
-                    int relativeY = (int) (touchWorldPos.y - rb.position.y);
-
-                    // up
-                    if (relativeY >= 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
-                    {
-                        if ((inputs.Count == 0) || (lastInput != Vector2Int.up))
-                        {
-                            lastInput = new Vector2Int(0, 1);
-                            inputs.Enqueue(new Vector2Int(0, 1));
-                        }
-                    }
-                    // down
-                    else if (relativeY < 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
-                    {
-                        if ((inputs.Count == 0) || (lastInput != Vector2Int.down))
-                        {
-                            lastInput = new Vector2Int(0, -1);
-                            inputs.Enqueue(new Vector2Int(0, -1));
-                        }
-                    }
-                    // right
-                    else if (relativeX >= 0 && (Math.Abs(relativeX) > Math.Abs(relativeY)))
-                    {
-                        if ((inputs.Count == 0) || (lastInput != Vector2Int.right))
-                        {
-                            lastInput = new Vector2Int(1, 0);
-                            inputs.Enqueue(new Vector2Int(1, 0));
-                        }
-                    }
-                    // left
-                    else
-                    {
-                        if ((inputs.Count == 0) || (lastInput != Vector2Int.left))
-                        {
-                            lastInput = new Vector2Int(-1, 0);
-                            inputs.Enqueue(new Vector2Int(-1, 0));
-                        }
-                    }
                 }
             }
         }
