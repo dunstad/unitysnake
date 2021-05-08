@@ -29,6 +29,6 @@ public class FoodCollider : MonoBehaviour
     void OnTriggerEnter2D(Collider2D col)
     {
         var newLocation = locations[Random.Range(0, locations.Count - 1)];
-        transform.SetPositionAndRotation(new Vector3(newLocation.x + .5f, newLocation.y + .5f, 0), transform.rotation);
+        transform.SetPositionAndRotation(new Vector3(newLocation.x + .5f, newLocation.y + .5f, -1), transform.rotation);
     }
 }
