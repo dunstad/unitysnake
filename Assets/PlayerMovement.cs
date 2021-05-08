@@ -1,15 +1,18 @@
+#nullable enable
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 using UnityEngine.Tilemaps;
 
-// TODO: queue movement
+// TODO: button press instead of getAxisRaw
 public class PlayerMovement : MonoBehaviour
 {
-    public Vector2Int direction;
+    Vector2Int direction;
     public Rigidbody2D rb;
     public Tilemap collidable;
+    Queue<Vector2Int> inputs;
+    Vector2Int lastInput;
 
     Camera cam;
 
@@ -19,6 +22,7 @@ public class PlayerMovement : MonoBehaviour
         cam = Camera.main;
         direction.x = 0;
         direction.y = 0;
+        inputs = new Queue<Vector2Int>();
         InvokeRepeating("MoveSnake", .5f, .5f);
     }
 
@@ -35,26 +39,38 @@ public class PlayerMovement : MonoBehaviour
             // up
             if (axisY >= 0 && (Math.Abs(axisY) > Math.Abs(axisX)))
             {
-                direction.x = 0;
-                direction.y = 1;
+                if ((inputs.Count == 0) || (lastInput != Vector2Int.up))
+                {
+                    lastInput = new Vector2Int(0, 1);
+                    inputs.Enqueue(new Vector2Int(0, 1));
+                }
             }
             // down
             else if (axisY < 0 && (Math.Abs(axisY) > Math.Abs(axisX)))
             {
-                direction.x = 0;
-                direction.y = -1;
+                if ((inputs.Count == 0) || (lastInput != Vector2Int.down))
+                {
+                    lastInput = new Vector2Int(0, -1);
+                    inputs.Enqueue(new Vector2Int(0, -1));
+                }
             }
             // right
             else if (axisX >= 0 && (Math.Abs(axisX) > Math.Abs(axisY)))
             {
-                direction.x = 1;
-                direction.y = 0;
+                if ((inputs.Count == 0) || (lastInput != Vector2Int.right))
+                {
+                    lastInput = new Vector2Int(1, 0);
+                    inputs.Enqueue(new Vector2Int(1, 0));
+                }
             }
             // left
             else
             {
-                direction.x = -1;
-                direction.y = 0;
+                if ((inputs.Count == 0) || (lastInput != Vector2Int.left))
+                {
+                    lastInput = new Vector2Int(-1, 0);
+                    inputs.Enqueue(new Vector2Int(-1, 0));
+                }
             }
         }
 
@@ -77,26 +93,38 @@ public class PlayerMovement : MonoBehaviour
                     // up
                     if (relativeY >= 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
                     {
-                        direction.x = 0;
-                        direction.y = 1;
+                        if ((inputs.Count == 0) || (lastInput != Vector2Int.up))
+                        {
+                            lastInput = new Vector2Int(0, 1);
+                            inputs.Enqueue(new Vector2Int(0, 1));
+                        }
                     }
                     // down
                     else if (relativeY < 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
                     {
-                        direction.x = 0;
-                        direction.y = -1;
+                        if ((inputs.Count == 0) || (lastInput != Vector2Int.down))
+                        {
+                            lastInput = new Vector2Int(0, -1);
+                            inputs.Enqueue(new Vector2Int(0, -1));
+                        }
                     }
                     // right
                     else if (relativeX >= 0 && (Math.Abs(relativeX) > Math.Abs(relativeY)))
                     {
-                        direction.x = 1;
-                        direction.y = 0;
+                        if ((inputs.Count == 0) || (lastInput != Vector2Int.right))
+                        {
+                            lastInput = new Vector2Int(1, 0);
+                            inputs.Enqueue(new Vector2Int(1, 0));
+                        }
                     }
                     // left
                     else
                     {
-                        direction.x = -1;
-                        direction.y = 0;
+                        if ((inputs.Count == 0) || (lastInput != Vector2Int.left))
+                        {
+                            lastInput = new Vector2Int(-1, 0);
+                            inputs.Enqueue(new Vector2Int(-1, 0));
+                        }
                     }
                 }
             }
@@ -105,11 +133,15 @@ public class PlayerMovement : MonoBehaviour
 
     void MoveSnake()
     {
+        if (inputs.Count != 0)
+        {
+            Debug.Log(inputs.Count);
+            direction = inputs.Dequeue();
+        }
         var nextPos = new Vector3Int();
         nextPos.x = (int)rb.position.x + direction.x;
         nextPos.y = (int)rb.position.y + direction.y;
         nextPos.z = 0;
-        // new Vector3Int(rb.position.x + direction.x, rb.position.y + direction.y
         Sprite? sprite = collidable.GetSprite(nextPos);
         if (sprite is null)
         {
