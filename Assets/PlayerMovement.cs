@@ -21,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
     Camera cam;
 
     // TODO: tail collision
+    // TODO: increase speed
     // ideas: one extra turn to react, ghost tail?
 
     // Start is called before the first frame update
@@ -30,6 +31,7 @@ public class PlayerMovement : MonoBehaviour
         direction.x = 0;
         direction.y = 0;
         lastInput = direction;
+        tail = new List<GameObject>();
         inputs = new Queue<Vector2Int>();
         InvokeRepeating("MoveSnake", .5f, .5f);
     }
@@ -108,11 +110,17 @@ public class PlayerMovement : MonoBehaviour
     {
         // tail movement
         // stop iterating one before the end, last piece moves to head position
-        for (var i = tail.Count - 1; i >= 1; i--)
+        if (tail.Count > 1)
         {
-            tail[i].transform.SetPositionAndRotation(tail[i-1].transform.position, tail[i-1].transform.rotation);
+            for (var i = tail.Count - 1; i >= 1; i--)
+            {
+                tail[i].transform.SetPositionAndRotation(tail[i-1].transform.position, tail[i-1].transform.rotation);
+            }
         }
-        tail[0].transform.SetPositionAndRotation(transform.position, transform.rotation);
+        if (tail.Count > 0)
+        {
+            tail[0].transform.SetPositionAndRotation(transform.position, transform.rotation);
+        }
 
         // head movement
         if (inputs.Count != 0)
@@ -150,7 +158,9 @@ public class PlayerMovement : MonoBehaviour
         {
             tailEnd = gameObject;
         }
-        newTail.transform.SetPositionAndRotation(tailEnd.transform.position, tailEnd.transform.rotation);
+        var newTailPos = tailEnd.transform.position;
+        newTailPos.z += 1;
+        newTail.transform.SetPositionAndRotation(newTailPos, tailEnd.transform.rotation);
         tail.Add(newTail);
     }
 
