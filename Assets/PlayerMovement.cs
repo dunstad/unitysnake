@@ -12,7 +12,10 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody2D rb;
     public Tilemap collidable;
     Queue<Vector2Int> inputs;
+    Vector2Int newInput;
     Vector2Int lastInput;
+
+    public List<GameObject> tail;
 
     Camera cam;
 
@@ -22,6 +25,7 @@ public class PlayerMovement : MonoBehaviour
         cam = Camera.main;
         direction.x = 0;
         direction.y = 0;
+        lastInput = direction;
         inputs = new Queue<Vector2Int>();
         InvokeRepeating("MoveSnake", .5f, .5f);
     }
@@ -30,43 +34,30 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         // input
+        // initialize to -lastInput so it's ignored by default
+        newInput = -lastInput;
 
         // handle keyboard/gamepad input
+        // TODO: ignore inputs that go back into the tail (direction + input = 0)
         // up
         if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
-            if ((inputs.Count == 0) || (lastInput != Vector2Int.up))
-            {
-                lastInput = new Vector2Int(0, 1);
-                inputs.Enqueue(new Vector2Int(0, 1));
-            }
+            newInput = new Vector2Int(0, 1);
         }
         // down
         else if (Keyboard.current.downArrowKey.wasPressedThisFrame)
         {
-            if ((inputs.Count == 0) || (lastInput != Vector2Int.down))
-            {
-                lastInput = new Vector2Int(0, -1);
-                inputs.Enqueue(new Vector2Int(0, -1));
-            }
+            newInput = new Vector2Int(0, -1);
         }
         // right
         else if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
-            if ((inputs.Count == 0) || (lastInput != Vector2Int.right))
-            {
-                lastInput = new Vector2Int(1, 0);
-                inputs.Enqueue(new Vector2Int(1, 0));
-            }
+            newInput = new Vector2Int(1, 0);
         }
         // left
         else if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
-            if ((inputs.Count == 0) || (lastInput != Vector2Int.left))
-            {
-                lastInput = new Vector2Int(-1, 0);
-                inputs.Enqueue(new Vector2Int(-1, 0));
-            }
+            newInput = new Vector2Int(-1, 0);
         }
 
         // Handle screen touches.
@@ -81,44 +72,45 @@ public class PlayerMovement : MonoBehaviour
             // up
             if (relativeY >= 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
             {
-                if ((inputs.Count == 0) || (lastInput != Vector2Int.up))
-                {
-                    lastInput = new Vector2Int(0, 1);
-                    inputs.Enqueue(new Vector2Int(0, 1));
-                }
+                newInput = new Vector2Int(0, 1);
             }
             // down
             else if (relativeY < 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
             {
-                if ((inputs.Count == 0) || (lastInput != Vector2Int.down))
-                {
-                    lastInput = new Vector2Int(0, -1);
-                    inputs.Enqueue(new Vector2Int(0, -1));
-                }
+                newInput = new Vector2Int(0, -1);
             }
             // right
             else if (relativeX >= 0 && (Math.Abs(relativeX) > Math.Abs(relativeY)))
             {
-                if ((inputs.Count == 0) || (lastInput != Vector2Int.right))
-                {
-                    lastInput = new Vector2Int(1, 0);
-                    inputs.Enqueue(new Vector2Int(1, 0));
-                }
+                newInput = new Vector2Int(1, 0);
             }
             // left
             else
             {
-                if ((inputs.Count == 0) || (lastInput != Vector2Int.left))
-                {
-                    lastInput = new Vector2Int(-1, 0);
-                    inputs.Enqueue(new Vector2Int(-1, 0));
-                }
+                newInput = new Vector2Int(-1, 0);
             }
+        }
+        
+        // no need to queue moves in the same direction
+        // can't go back into your tail
+        if ((newInput != lastInput) && (newInput != -lastInput))
+        {
+            lastInput = newInput;
+            inputs.Enqueue(newInput);
         }
     }
 
     void MoveSnake()
     {
+        // tail movement
+        // stop iterating one before the end, last piece moves to head position
+        for (var i = tail.Count - 1; i >= 1; i--)
+        {
+            tail[i].transform.SetPositionAndRotation(tail[i-1].transform.position, tail[i-1].transform.rotation);
+        }
+        tail[0].transform.SetPositionAndRotation(transform.position, transform.rotation);
+
+        // head movement
         if (inputs.Count != 0)
         {
             Debug.Log(inputs.Count);
@@ -128,6 +120,8 @@ public class PlayerMovement : MonoBehaviour
         nextPos.x = (int) Math.Floor(rb.position.x) + direction.x;
         nextPos.y = (int) Math.Floor(rb.position.y) + direction.y;
         nextPos.z = 0;
+        
+        // wall collision and death
         Sprite? sprite = collidable.GetSprite(nextPos);
         if (sprite is null)
         {
@@ -137,6 +131,7 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.Log("u ded");
             Destroy(gameObject);
+            // TODO: stop calling MoveSnake after this
         }
     }
 }
