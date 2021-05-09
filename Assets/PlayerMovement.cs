@@ -16,8 +16,12 @@ public class PlayerMovement : MonoBehaviour
     Vector2Int lastInput;
 
     public List<GameObject> tail;
+    public GameObject tailPrefab;
 
     Camera cam;
+
+    // TODO: tail collision
+    // ideas: one extra turn to react, ghost tail?
 
     // Start is called before the first frame update
     void Start()
@@ -129,10 +133,32 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
+            Die();
+        }
+    }
+
+    public void LengthenTail()
+    {
+        Debug.Log("tail +1");
+        GameObject newTail = Instantiate(tailPrefab);
+        GameObject tailEnd;
+        if (tail.Count > 0) 
+        {
+            tailEnd = tail[tail.Count - 1];
+        }
+        else
+        {
+            tailEnd = gameObject;
+        }
+        newTail.transform.SetPositionAndRotation(tailEnd.transform.position, tailEnd.transform.rotation);
+        tail.Add(newTail);
+    }
+
+    void Die()
+    {
             Debug.Log("u ded");
             Destroy(gameObject);
             // TODO: stop calling MoveSnake after this
-        }
     }
 }
 
