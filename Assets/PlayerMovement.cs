@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 using System;
 using UnityEngine.Tilemaps;
 
-// TODO: button press instead of getAxisRaw
 public class PlayerMovement : MonoBehaviour
 {
     Vector2Int direction;
@@ -126,8 +125,8 @@ public class PlayerMovement : MonoBehaviour
             direction = inputs.Dequeue();
         }
         var nextPos = new Vector3Int();
-        nextPos.x = (int)rb.position.x + direction.x;
-        nextPos.y = (int)rb.position.y + direction.y;
+        nextPos.x = (int) Math.Floor(rb.position.x) + direction.x;
+        nextPos.y = (int) Math.Floor(rb.position.y) + direction.y;
         nextPos.z = 0;
         Sprite? sprite = collidable.GetSprite(nextPos);
         if (sprite is null)

@@ -135,7 +135,7 @@ GameObject:
   - component: {fileID: 254042039}
   - component: {fileID: 254042038}
   m_Layer: 0
-  m_Name: Collidable Tilemap
+  m_Name: Collidable
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2576,7 +2576,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef69f4723cc8cea4597fcc9315f533c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  direction: {x: 0, y: 0}
   rb: {fileID: 401879637}
   collidable: {fileID: 254042039}
 --- !u!50 &401879637
