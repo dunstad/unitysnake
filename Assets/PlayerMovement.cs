@@ -26,6 +26,10 @@ public class PlayerMovement : MonoBehaviour
     float ticksPerSecond;
 
     // ideas: one extra turn to react, ghost tail?
+    // TODO: improve touch
+    // TODO: start menu
+    // TODO: sounds
+    // TODO: smooth movement
 
     // Start is called before the first frame update
     void Start()
