@@ -18,10 +18,12 @@ public class PlayerMovement : MonoBehaviour
     public List<GameObject> tail;
     public GameObject tailPrefab;
 
+    Vector3 lastTailPos;
+
     Camera cam;
 
-    // TODO: tail collision
-    // TODO: increase speed
+    float ticksPerSecond;
+
     // ideas: one extra turn to react, ghost tail?
 
     // Start is called before the first frame update
@@ -31,9 +33,11 @@ public class PlayerMovement : MonoBehaviour
         direction.x = 0;
         direction.y = 0;
         lastInput = direction;
+        lastTailPos = transform.position;
         tail = new List<GameObject>();
         inputs = new Queue<Vector2Int>();
-        InvokeRepeating("MoveSnake", .5f, .5f);
+        ticksPerSecond = .5f;
+        InvokeRepeating("MoveSnake", .5f, ticksPerSecond);
     }
 
     // Update is called once per frame
@@ -108,20 +112,6 @@ public class PlayerMovement : MonoBehaviour
 
     void MoveSnake()
     {
-        // tail movement
-        // stop iterating one before the end, last piece moves to head position
-        if (tail.Count > 1)
-        {
-            for (var i = tail.Count - 1; i >= 1; i--)
-            {
-                tail[i].transform.SetPositionAndRotation(tail[i-1].transform.position, tail[i-1].transform.rotation);
-            }
-        }
-        if (tail.Count > 0)
-        {
-            tail[0].transform.SetPositionAndRotation(transform.position, transform.rotation);
-        }
-
         // head movement
         if (inputs.Count != 0)
         {
@@ -137,11 +127,31 @@ public class PlayerMovement : MonoBehaviour
         Sprite? sprite = collidable.GetSprite(nextPos);
         if (sprite is null)
         {
+            // this move doesn't happen right away
             rb.MovePosition(rb.position + direction);
         }
         else
         {
             Die();
+        }
+
+        // tail movement
+        // stop iterating one before the end, last piece moves to head position
+        if (tail.Count > 1)
+        {
+            for (var i = tail.Count - 1; i >= 1; i--)
+            {
+                tail[i].transform.SetPositionAndRotation(tail[i-1].transform.position, tail[i-1].transform.rotation);
+            }
+        }
+        if (tail.Count > 0)
+        {
+            tail[0].transform.SetPositionAndRotation(transform.position, transform.rotation);
+            lastTailPos = tail[tail.Count - 1].transform.position;
+        }
+        else 
+        {
+            lastTailPos = transform.position;
         }
     }
 
@@ -149,26 +159,32 @@ public class PlayerMovement : MonoBehaviour
     {
         Debug.Log("tail +1");
         GameObject newTail = Instantiate(tailPrefab);
-        GameObject tailEnd;
-        if (tail.Count > 0) 
+        lastTailPos.z += 1;
+        newTail.transform.SetPositionAndRotation(lastTailPos, transform.rotation);
+        // because physics movement happens after transform changes,
+        // this prevents our tail colliding with the head during normal movement
+        if (tail.Count == 0)
         {
-            tailEnd = tail[tail.Count - 1];
+            newTail.GetComponent<BoxCollider2D>().enabled = false;
         }
-        else
-        {
-            tailEnd = gameObject;
-        }
-        var newTailPos = tailEnd.transform.position;
-        newTailPos.z += 1;
-        newTail.transform.SetPositionAndRotation(newTailPos, tailEnd.transform.rotation);
         tail.Add(newTail);
+        CancelInvoke();
+        ticksPerSecond *= 0.5f;
+        InvokeRepeating("MoveSnake", ticksPerSecond, ticksPerSecond);
+    }
+
+    void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.CompareTag("tail"))
+        {
+            Die();
+        }
     }
 
     void Die()
     {
             Debug.Log("u ded");
             Destroy(gameObject);
-            // TODO: stop calling MoveSnake after this
     }
 }
 

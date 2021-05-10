@@ -30,7 +30,9 @@ public class FoodCollider : MonoBehaviour
     {
         var newLocation = locations[Random.Range(0, locations.Count - 1)];
         transform.SetPositionAndRotation(new Vector3(newLocation.x + .5f, newLocation.y + .5f, -1), transform.rotation);
-        // TODO: no error when spawning on tail
-        col.gameObject.GetComponent<PlayerMovement>().LengthenTail();
+        if (col.GetComponent<PlayerMovement>())
+        {
+            col.GetComponent<PlayerMovement>().LengthenTail();
+        }
     }
 }
