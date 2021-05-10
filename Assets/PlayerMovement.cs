@@ -48,6 +48,12 @@ public class PlayerMovement : MonoBehaviour
         // initialize to -lastInput so it's ignored by default
         newInput = -lastInput;
 
+        // pause
+        if (Keyboard.current.pKey.wasPressedThisFrame)
+        {
+            Time.timeScale = (Time.timeScale + 1) % 2;
+        }
+
         // handle keyboard/gamepad input
         // TODO: ignore inputs that go back into the tail (direction + input = 0)
         // up
