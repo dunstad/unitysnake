@@ -169,7 +169,7 @@ public class PlayerMovement : MonoBehaviour
         }
         tail.Add(newTail);
         CancelInvoke();
-        ticksPerSecond *= 0.5f;
+        ticksPerSecond *= 0.95f;
         InvokeRepeating("MoveSnake", ticksPerSecond, ticksPerSecond);
     }
 
