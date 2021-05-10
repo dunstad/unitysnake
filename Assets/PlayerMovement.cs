@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
 using UnityEngine.Tilemaps;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -185,6 +186,7 @@ public class PlayerMovement : MonoBehaviour
     {
             Debug.Log("u ded");
             Destroy(gameObject);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
 
