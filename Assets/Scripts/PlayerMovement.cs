@@ -10,7 +10,6 @@ using UnityEngine.SceneManagement;
 public class PlayerMovement : MonoBehaviour
 {
     Vector2Int direction;
-    Vector2 moveStartPos;
     Vector2 moveTargetPos;
     public Rigidbody2D rb;
     public Tilemap collidable;
@@ -30,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
 
     bool moving;
     IEnumerator coroutine;
+    Vector2[] moveStartPositions;
 
     // ideas: one extra turn to react, ghost tail?
     // TODO: improve touch
@@ -49,6 +49,8 @@ public class PlayerMovement : MonoBehaviour
         inputs = new Queue<Vector2Int>();
         tickSeconds = .25f;
         moving = false;
+        moveStartPositions = new Vector2[1];
+        moveStartPositions[0] = rb.position;
         InvokeRepeating("MoveSnake", .5f, tickSeconds);
     }
 
@@ -150,12 +152,27 @@ public class PlayerMovement : MonoBehaviour
             {
                 StopCoroutine(coroutine);
                 rb.position = moveTargetPos;
+                if (tail.Count > 0)
+                {
+                    tail[0].GetComponent<Rigidbody2D>().position = moveStartPositions[0];
+                }
+                for (var i = 1; i < tail.Count; i++)
+                {
+                    tail[i].GetComponent<Rigidbody2D>().position = moveStartPositions[i];
+                }
                 moving = false;
                 Debug.Log("coroutine stopped!");
             }
-            moveStartPos = rb.position;
             moveTargetPos = rb.position + (Vector2) direction;
-            coroutine = Movement(moveTargetPos);
+
+            moveStartPositions = new Vector2[tail.Count + 1];
+            moveStartPositions[0] = rb.position;
+            for (var i = 1; i <= tail.Count; i++)
+            {
+                moveStartPositions[i] = tail[i - 1].GetComponent<Rigidbody2D>().position;
+            }
+
+            coroutine = Movement(moveStartPositions, moveTargetPos);
             timeSinceTick = 0f;
             StartCoroutine(coroutine);
         }
@@ -170,12 +187,12 @@ public class PlayerMovement : MonoBehaviour
         {
             for (var i = tail.Count - 1; i >= 1; i--)
             {
-                tail[i].transform.SetPositionAndRotation(tail[i-1].transform.position, tail[i-1].transform.rotation);
+                // tail[i].transform.SetPositionAndRotation(tail[i-1].transform.position, tail[i-1].transform.rotation);
             }
         }
         if (tail.Count > 0)
         {
-            tail[0].transform.SetPositionAndRotation(transform.position, transform.rotation);
+            // tail[0].transform.SetPositionAndRotation(transform.position, transform.rotation);
             lastTailPos = tail[tail.Count - 1].transform.position;
         }
         else 
@@ -188,7 +205,8 @@ public class PlayerMovement : MonoBehaviour
     {
         GameObject newTail = Instantiate(tailPrefab);
         lastTailPos.z += 1;
-        newTail.transform.SetPositionAndRotation(lastTailPos, transform.rotation);
+        // newTail.transform.SetPositionAndRotation(lastTailPos, transform.rotation);
+        newTail.GetComponent<Rigidbody2D>().position = lastTailPos;
         // because physics movement happens after transform changes,
         // this prevents our tail colliding with the head during normal movement
         if (tail.Count == 0)
@@ -215,7 +233,7 @@ public class PlayerMovement : MonoBehaviour
             Destroy(gameObject);
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
-    IEnumerator Movement(Vector2 end)
+    IEnumerator Movement(Vector2[] startPositions, Vector2 end)
     {
         Debug.Log("coroutine!");
         moving = true;
@@ -223,13 +241,37 @@ public class PlayerMovement : MonoBehaviour
 
         while (sqrRemainingDistance > 0.01) {
             timeSinceTick += Time.deltaTime;
-            Vector2 newPosition = Vector2.MoveTowards(moveStartPos, end, (timeSinceTick / tickSeconds));
-            rb.MovePosition(newPosition);
+            var progress = timeSinceTick / tickSeconds;
+            for (var i = 0; i < startPositions.Length; i++)
+            {
+                Rigidbody2D body;
+                Vector2 target;
+                if (i == 0)
+                {
+                    body = rb;
+                    target = end;
+                }
+                else 
+                {
+                    body = tail[i-1].GetComponent<Rigidbody2D>();
+                    target = startPositions[i - 1];
+                }
+                Vector2 newPosition = Vector2.MoveTowards(startPositions[i], target, progress);
+                body.MovePosition(newPosition);
+            }
             sqrRemainingDistance = (rb.position - end).sqrMagnitude;
             yield return null;
         }
 
         rb.position = end;
+        if (tail.Count > 0)
+        {
+        tail[0].GetComponent<Rigidbody2D>().position = startPositions[0];
+        }
+        for (var i = 1; i < tail.Count; i++)
+        {
+            tail[i].GetComponent<Rigidbody2D>().position = startPositions[i];
+        }
         moving = false;
         Debug.Log("coroutine finished!");
     }
