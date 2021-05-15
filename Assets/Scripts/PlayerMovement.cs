@@ -10,6 +10,8 @@ using UnityEngine.SceneManagement;
 public class PlayerMovement : MonoBehaviour
 {
     Vector2Int direction;
+    Vector2 moveStartPos;
+    Vector2 moveTargetPos;
     public Rigidbody2D rb;
     public Tilemap collidable;
     Queue<Vector2Int> inputs;
@@ -23,13 +25,17 @@ public class PlayerMovement : MonoBehaviour
 
     Camera cam;
 
-    float ticksPerSecond;
+    float tickSeconds;
+    float timeSinceTick;
+
+    bool moving;
+    IEnumerator coroutine;
 
     // ideas: one extra turn to react, ghost tail?
     // TODO: improve touch
     // TODO: start menu
     // TODO: sounds
-    // TODO: smooth movement
+    // TODO: smooth tail movement
 
     // Start is called before the first frame update
     void Start()
@@ -41,8 +47,9 @@ public class PlayerMovement : MonoBehaviour
         lastTailPos = transform.position;
         tail = new List<GameObject>();
         inputs = new Queue<Vector2Int>();
-        ticksPerSecond = .5f;
-        InvokeRepeating("MoveSnake", .5f, ticksPerSecond);
+        tickSeconds = .25f;
+        moving = false;
+        InvokeRepeating("MoveSnake", .5f, tickSeconds);
     }
 
     // Update is called once per frame
@@ -126,7 +133,6 @@ public class PlayerMovement : MonoBehaviour
         // head movement
         if (inputs.Count != 0)
         {
-            Debug.Log(inputs.Count);
             direction = inputs.Dequeue();
         }
         var nextPos = new Vector3Int();
@@ -139,7 +145,19 @@ public class PlayerMovement : MonoBehaviour
         if (sprite is null)
         {
             // this move doesn't happen right away
-            rb.MovePosition(rb.position + direction);
+            // rb.MovePosition(rb.position + direction);
+            if (moving)
+            {
+                StopCoroutine(coroutine);
+                rb.position = moveTargetPos;
+                moving = false;
+                Debug.Log("coroutine stopped!");
+            }
+            moveStartPos = rb.position;
+            moveTargetPos = rb.position + (Vector2) direction;
+            coroutine = Movement(moveTargetPos);
+            timeSinceTick = 0f;
+            StartCoroutine(coroutine);
         }
         else
         {
@@ -168,7 +186,6 @@ public class PlayerMovement : MonoBehaviour
 
     public void LengthenTail()
     {
-        Debug.Log("tail +1");
         GameObject newTail = Instantiate(tailPrefab);
         lastTailPos.z += 1;
         newTail.transform.SetPositionAndRotation(lastTailPos, transform.rotation);
@@ -180,8 +197,8 @@ public class PlayerMovement : MonoBehaviour
         }
         tail.Add(newTail);
         CancelInvoke();
-        ticksPerSecond *= 0.95f;
-        InvokeRepeating("MoveSnake", ticksPerSecond, ticksPerSecond);
+        tickSeconds *= 0.95f;
+        InvokeRepeating("MoveSnake", tickSeconds, tickSeconds);
     }
 
     void OnTriggerEnter2D(Collider2D col)
@@ -197,6 +214,24 @@ public class PlayerMovement : MonoBehaviour
             Debug.Log("u ded");
             Destroy(gameObject);
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+    IEnumerator Movement(Vector2 end)
+    {
+        Debug.Log("coroutine!");
+        moving = true;
+        float sqrRemainingDistance = (rb.position - end).sqrMagnitude;
+
+        while (sqrRemainingDistance > 0.01) {
+            timeSinceTick += Time.deltaTime;
+            Vector2 newPosition = Vector2.MoveTowards(moveStartPos, end, (timeSinceTick / tickSeconds));
+            rb.MovePosition(newPosition);
+            sqrRemainingDistance = (rb.position - end).sqrMagnitude;
+            yield return null;
+        }
+
+        rb.position = end;
+        moving = false;
+        Debug.Log("coroutine finished!");
     }
 }
 
