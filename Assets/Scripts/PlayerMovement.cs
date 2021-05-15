@@ -33,9 +33,8 @@ public class PlayerMovement : MonoBehaviour
 
     // ideas: one extra turn to react, ghost tail?
     // TODO: improve touch
-    // TODO: start menu
     // TODO: sounds
-    // TODO: smooth tail movement
+    // TODO: tail z positioning/sorting
 
     // Start is called before the first frame update
     void Start()
@@ -203,11 +202,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void LengthenTail()
     {
-        GameObject newTail = Instantiate(tailPrefab);
+        GameObject newTail = Instantiate(tailPrefab, lastTailPos, transform.rotation);
         lastTailPos.z += 1;
-        // newTail.transform.SetPositionAndRotation(lastTailPos, transform.rotation);
-        newTail.GetComponent<Rigidbody2D>().position = lastTailPos;
-        // because physics movement happens after transform changes,
         // this prevents our tail colliding with the head during normal movement
         if (tail.Count == 0)
         {
