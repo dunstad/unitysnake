@@ -9,6 +9,7 @@ public class FoodCollider : MonoBehaviour
 {
     public Tilemap walkable;
     List<Vector2> locations;
+    public AudioSource sound;
 
     void Start()
     {
@@ -33,6 +34,8 @@ public class FoodCollider : MonoBehaviour
         if (col.GetComponent<PlayerMovement>())
         {
             col.GetComponent<PlayerMovement>().LengthenTail();
+            sound.time = 0.1f;
+            sound.Play();
         }
     }
 }

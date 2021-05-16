@@ -31,9 +31,16 @@ public class PlayerMovement : MonoBehaviour
     IEnumerator coroutine;
     Vector2[] moveStartPositions;
 
+    public AudioSource deathSound;
+    public AudioSource inputSound;
+
     // ideas: one extra turn to react, ghost tail?
     // TODO: improve touch
-    // TODO: sounds
+    // TODO: death sound not playing
+    // TODO: my own music
+    // TODO: screen shake
+    // TODO: particles
+    // TODO: scaling animation
 
     // Start is called before the first frame update
     void Start()
@@ -125,6 +132,7 @@ public class PlayerMovement : MonoBehaviour
         {
             lastInput = newInput;
             inputs.Enqueue(newInput);
+            inputSound.Play();
         }
     }
 
@@ -228,6 +236,7 @@ public class PlayerMovement : MonoBehaviour
             Debug.Log("u ded");
             Destroy(gameObject);
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            deathSound.Play();
     }
     IEnumerator Movement(Vector2[] startPositions, Vector2 end)
     {
