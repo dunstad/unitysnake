@@ -33,8 +33,10 @@ public class PlayerMovement : MonoBehaviour
 
     public AudioSource deathSound;
     public AudioSource inputSound;
+    public ParticleSystem dustParticles;
 
     // ideas: one extra turn to react, ghost tail?
+    // TODO: dust rotation, tail hiding dust
     // TODO: score display
     // TODO: screen shake
     // TODO: scaling animation
@@ -143,6 +145,20 @@ public class PlayerMovement : MonoBehaviour
         if (inputs.Count != 0)
         {
             direction = inputs.Dequeue();
+            var particlePos = transform.position;
+            particlePos.z += .9f;
+            dustParticles.gameObject.transform.position = particlePos;
+            int dustRotation;
+            if (direction.x != 0)
+            {
+                dustRotation = direction.x * -90;
+            } else
+            {
+                dustRotation = direction.y * 90 + 91;
+            }
+            dustParticles.gameObject.transform.rotation = Quaternion.Euler(0, dustRotation, 0);
+            
+            dustParticles.Play();
         }
         var nextPos = new Vector3Int();
         nextPos.x = (int) Math.Floor(rb.position.x) + direction.x;
