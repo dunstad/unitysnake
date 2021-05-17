@@ -10,6 +10,7 @@ public class FoodCollider : MonoBehaviour
     public Tilemap walkable;
     List<Vector2> locations;
     public AudioSource sound;
+    public ParticleSystem particles;
 
     void Start()
     {
@@ -29,6 +30,7 @@ public class FoodCollider : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
+        particles.gameObject.transform.position = transform.position;
         var newLocation = locations[Random.Range(0, locations.Count - 1)];
         transform.SetPositionAndRotation(new Vector3(newLocation.x + .5f, newLocation.y + .5f, -1), transform.rotation);
         if (col.GetComponent<PlayerMovement>())
@@ -36,6 +38,7 @@ public class FoodCollider : MonoBehaviour
             col.GetComponent<PlayerMovement>().LengthenTail();
             sound.time = 0.1f;
             sound.Play();
+            particles.Play();
         }
     }
 }

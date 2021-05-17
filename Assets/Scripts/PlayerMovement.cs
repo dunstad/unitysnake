@@ -35,12 +35,13 @@ public class PlayerMovement : MonoBehaviour
     public AudioSource inputSound;
 
     // ideas: one extra turn to react, ghost tail?
-    // TODO: improve touch
-    // TODO: death sound not playing
-    // TODO: my own music
+    // TODO: score display
     // TODO: screen shake
-    // TODO: particles
     // TODO: scaling animation
+    // TODO: improve touch
+    // TODO: my own music
+    // TODO: death sound not playing (add game over overlay)
+    // TODO: eating particles don't match sound effect
 
     // Start is called before the first frame update
     void Start()
