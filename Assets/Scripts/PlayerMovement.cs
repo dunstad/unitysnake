@@ -36,7 +36,6 @@ public class PlayerMovement : MonoBehaviour
     public ParticleSystem dustParticles;
 
     // ideas: one extra turn to react, ghost tail?
-    // TODO: dust rotation, tail hiding dust
     // TODO: score display
     // TODO: screen shake
     // TODO: scaling animation
@@ -146,18 +145,17 @@ public class PlayerMovement : MonoBehaviour
         {
             direction = inputs.Dequeue();
             var particlePos = transform.position;
-            particlePos.z += .9f;
+            particlePos.z += .005f;
             dustParticles.gameObject.transform.position = particlePos;
             int dustRotation;
-            if (direction.x != 0)
+            if (direction.y != 0)
             {
-                dustRotation = direction.x * -90;
+                dustRotation = direction.y * 90;
             } else
             {
-                dustRotation = direction.y * 90 + 91;
+                dustRotation = direction.x * 90 + 90;
             }
-            dustParticles.gameObject.transform.rotation = Quaternion.Euler(0, dustRotation, 0);
-            
+            dustParticles.transform.eulerAngles = new Vector3(dustRotation, 90, 90);
             dustParticles.Play();
         }
         var nextPos = new Vector3Int();
