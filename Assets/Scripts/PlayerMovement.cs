@@ -280,6 +280,40 @@ public class PlayerMovement : MonoBehaviour
                 }
                 Vector2 newPosition = Vector2.MoveTowards(startPositions[i], target, progress);
                 body.MovePosition(newPosition);
+
+                // rotation
+                float bodyRotation;
+                var direction = target - startPositions[i];
+                float oldRotation;
+                Vector2 oldDirection;
+                if (startPositions.Length == 1)
+                {
+                    oldDirection = new Vector2(1, 0);
+                } else if (i != startPositions.Length - 1)
+                {
+                    oldDirection = startPositions[i] - startPositions[i + 1];
+                } else
+                {
+                    oldDirection = startPositions[i - 1] - startPositions[i];
+                }
+
+                if (direction.x != 0)
+                {
+                    bodyRotation = direction.x * -90;
+                } else
+                {
+                    bodyRotation = direction.y * -90 + 90;
+                }
+                
+                if (oldDirection.x != 0)
+                {
+                    oldRotation = oldDirection.x * -90;
+                } else
+                {
+                    oldRotation = oldDirection.y * -90 + 90;
+                }
+                body.rotation = Mathf.Lerp(oldRotation, bodyRotation, progress);
+                // body.MoveRotation(bodyRotation);
             }
             sqrRemainingDistance = (rb.position - end).sqrMagnitude;
             yield return null;
