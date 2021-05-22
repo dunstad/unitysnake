@@ -36,13 +36,14 @@ public class PlayerMovement : MonoBehaviour
     public ParticleSystem dustParticles;
 
     // ideas: one extra turn to react, ghost tail?
-    // TODO: rotate snake sprites
+    // TODO: fix 270-0 rotation
+    // TODO: fix last tail segment rotation
     // TODO: score display
     // TODO: screen shake
-    // TODO: scaling animation
+    // TODO: scaling animations
     // TODO: improve touch
     // TODO: pause button for touch
-    // TODO: my own music
+    // TODO: fix music loop
     // TODO: death sound not playing (add game over overlay)
     // TODO: eating particles don't match sound effect
 
