@@ -41,11 +41,10 @@ public class PlayerMovement : MonoBehaviour
     // TODO: score display
     // TODO: screen shake
     // TODO: scaling animations
-    // TODO: improve touch
+    // TODO: fix first touch goes in wrong direction
     // TODO: pause button for touch
     // TODO: fix music loop
     // TODO: death sound not playing (add game over overlay)
-    // TODO: eating particles don't match sound effect
 
     // Start is called before the first frame update
     void Start()
@@ -110,17 +109,18 @@ public class PlayerMovement : MonoBehaviour
             int relativeY = (int) (touchWorldPos.y - rb.position.y);
 
             // up
-            if (relativeY >= 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
+            // if (relativeY >= 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
+            if ((direction.y == 0) && (relativeY >= 0))
             {
                 newInput = new Vector2Int(0, 1);
             }
             // down
-            else if (relativeY < 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
+            else if ((direction.y == 0) && (relativeY < 0))
             {
                 newInput = new Vector2Int(0, -1);
             }
             // right
-            else if (relativeX >= 0 && (Math.Abs(relativeX) > Math.Abs(relativeY)))
+            else if ((direction.x == 0) && (relativeX >= 0))
             {
                 newInput = new Vector2Int(1, 0);
             }
