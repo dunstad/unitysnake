@@ -35,12 +35,11 @@ public class PlayerMovement : MonoBehaviour
     public AudioSource inputSound;
     public ParticleSystem dustParticles;
 
-    // ideas: one extra turn to react, ghost tail?
     // TODO: fix last tail segment rotation
+    // TODO: snap rotation after coroutine finishes
     // TODO: score display
     // TODO: screen shake
-    // TODO: scaling animations
-    // TODO: fix first touch goes in wrong direction
+    // TODO: fix phantom touches
     // TODO: pause button for touch
     // TODO: fix music loop
     // TODO: death sound not playing (add game over overlay)
@@ -169,8 +168,6 @@ public class PlayerMovement : MonoBehaviour
         Sprite? sprite = collidable.GetSprite(nextPos);
         if (sprite is null)
         {
-            // this move doesn't happen right away
-            // rb.MovePosition(rb.position + direction);
             if (moving)
             {
                 StopCoroutine(coroutine);
@@ -184,7 +181,6 @@ public class PlayerMovement : MonoBehaviour
                     tail[i].GetComponent<Rigidbody2D>().position = moveStartPositions[i];
                 }
                 moving = false;
-                Debug.Log("coroutine stopped!");
             }
             moveTargetPos = rb.position + (Vector2) direction;
 

@@ -26,6 +26,7 @@ public class FoodCollider : MonoBehaviour
                 }
             }
         }
+        StartCoroutine(Animate());
     }
 
     void OnTriggerEnter2D(Collider2D col)
@@ -39,6 +40,16 @@ public class FoodCollider : MonoBehaviour
             sound.time = 0.1f;
             sound.Play();
             particles.Play();
+        }
+    }
+
+    IEnumerator Animate()
+    {
+        while (true) {
+            transform.Rotate(new Vector3(0, 0, Mathf.Sin(Time.time) / 2));
+            var newScale = 1 * ((Mathf.Sin(Time.time) / 2) + 1.25f);
+            transform.localScale = new Vector3(newScale, newScale, newScale);
+            yield return null;
         }
     }
 }
