@@ -36,7 +36,6 @@ public class PlayerMovement : MonoBehaviour
     public ParticleSystem dustParticles;
 
     // ideas: one extra turn to react, ghost tail?
-    // TODO: fix 270-0 rotation
     // TODO: fix last tail segment rotation
     // TODO: score display
     // TODO: screen shake
@@ -258,7 +257,6 @@ public class PlayerMovement : MonoBehaviour
     }
     IEnumerator Movement(Vector2[] startPositions, Vector2 end)
     {
-        Debug.Log("coroutine!");
         moving = true;
         float sqrRemainingDistance = (rb.position - end).sqrMagnitude;
 
@@ -298,23 +296,25 @@ public class PlayerMovement : MonoBehaviour
                     oldDirection = startPositions[i - 1] - startPositions[i];
                 }
 
-                if (direction.x != 0)
+                if (oldDirection != direction)
                 {
-                    bodyRotation = direction.x * -90;
-                } else
-                {
-                    bodyRotation = direction.y * -90 + 90;
+                    if (direction.x != 0)
+                    {
+                        bodyRotation = direction.x * -90;
+                    } else
+                    {
+                        bodyRotation = direction.y * -90 + 90;
+                    }
+                    
+                    if (oldDirection == Vector2.Perpendicular(direction))
+                    {
+                        oldRotation = bodyRotation + 90;
+                    } else
+                    {
+                        oldRotation = bodyRotation - 90;
+                    }
+                    body.MoveRotation(Mathf.Lerp(oldRotation, bodyRotation, progress));
                 }
-                
-                if (oldDirection.x != 0)
-                {
-                    oldRotation = oldDirection.x * -90;
-                } else
-                {
-                    oldRotation = oldDirection.y * -90 + 90;
-                }
-                body.rotation = Mathf.Lerp(oldRotation, bodyRotation, progress);
-                // body.MoveRotation(bodyRotation);
             }
             sqrRemainingDistance = (rb.position - end).sqrMagnitude;
             yield return null;
@@ -330,7 +330,6 @@ public class PlayerMovement : MonoBehaviour
             tail[i].GetComponent<Rigidbody2D>().position = startPositions[i];
         }
         moving = false;
-        Debug.Log("coroutine finished!");
     }
 }
 
