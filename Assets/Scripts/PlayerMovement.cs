@@ -40,7 +40,7 @@ public class PlayerMovement : MonoBehaviour
     // TODO: snap rotation after coroutine finishes
     // TODO: score display
     // TODO: screen shake
-    // TODO: pause button for touch
+    // TODO: pause button for touch (two finger tap to pause?)
     // TODO: fix music loop
     // TODO: death sound not playing (add game over overlay)
 
@@ -236,7 +236,9 @@ public class PlayerMovement : MonoBehaviour
         tail.Add(newTail);
         CancelInvoke();
         tickSeconds *= 0.95f;
-        InvokeRepeating("MoveSnake", tickSeconds, tickSeconds);
+        // don't actually know why tickSeconds / 2 is right
+        // it stops the pausing on food pickup though
+        InvokeRepeating("MoveSnake", tickSeconds / 2, tickSeconds);
     }
 
     void OnTriggerEnter2D(Collider2D col)
