@@ -174,16 +174,7 @@ public class PlayerMovement : MonoBehaviour
             if (moving)
             {
                 StopCoroutine(coroutine);
-                rb.position = moveTargetPos;
-                if (tail.Count > 0)
-                {
-                    tail[0].GetComponent<Rigidbody2D>().position = moveStartPositions[0];
-                }
-                for (var i = 1; i < tail.Count; i++)
-                {
-                    tail[i].GetComponent<Rigidbody2D>().position = moveStartPositions[i];
-                }
-                moving = false;
+                MovementCleanup(moveTargetPos, moveStartPositions);
             }
             moveTargetPos = rb.position + (Vector2) direction;
 
@@ -320,15 +311,19 @@ public class PlayerMovement : MonoBehaviour
             sqrRemainingDistance = (rb.position - end).sqrMagnitude;
             yield return null;
         }
+        MovementCleanup(end, startPositions);
+    }
 
-        rb.position = end;
+    void MovementCleanup(Vector2 targetPos,  Vector2[] startPositions)
+    {
+        rb.position = targetPos;
         if (tail.Count > 0)
         {
-        tail[0].GetComponent<Rigidbody2D>().position = startPositions[0];
-        }
-        for (var i = 1; i < tail.Count; i++)
-        {
-            tail[i].GetComponent<Rigidbody2D>().position = startPositions[i];
+            for (var i = 0; i < tail.Count; i++)
+            {
+                var tailBody = tail[i].GetComponent<Rigidbody2D>();
+                tailBody.position = startPositions[i];
+            }
         }
         moving = false;
     }
