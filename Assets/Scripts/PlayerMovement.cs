@@ -34,12 +34,13 @@ public class PlayerMovement : MonoBehaviour
     public AudioSource deathSound;
     public AudioSource inputSound;
     public ParticleSystem dustParticles;
+    int lastTouch;
 
     // TODO: fix last tail segment rotation
     // TODO: snap rotation after coroutine finishes
     // TODO: score display
     // TODO: screen shake
-    // TODO: fix phantom touches
+    // TODO: fix not all touches changing direction
     // TODO: pause button for touch
     // TODO: fix music loop
     // TODO: death sound not playing (add game over overlay)
@@ -98,34 +99,38 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Handle screen touches.
-        if (Touchscreen.current.primaryTouch.phase.ReadValue() == UnityEngine.InputSystem.TouchPhase.Began)
+        if (Touchscreen.current.primaryTouch.startTime.ReadValue() >= Time.time)
         {
-            var touchPosition = Touchscreen.current.position.ReadValue();
-            Vector3 touchWorldPos = cam.ScreenToWorldPoint(touchPosition);
+            if (Touchscreen.current.primaryTouch.touchId.ReadValue() != lastTouch)
+            {
+                Debug.Log("TOUCHED!");
+                lastTouch = Touchscreen.current.primaryTouch.touchId.ReadValue();
+                var touchPosition = Touchscreen.current.position.ReadValue();
+                Vector3 touchWorldPos = cam.ScreenToWorldPoint(touchPosition);
 
-            int relativeX = (int) (touchWorldPos.x - rb.position.x);
-            int relativeY = (int) (touchWorldPos.y - rb.position.y);
+                int relativeX = (int) (touchWorldPos.x - rb.position.x);
+                int relativeY = (int) (touchWorldPos.y - rb.position.y);
 
-            // up
-            // if (relativeY >= 0 && (Math.Abs(relativeY) > Math.Abs(relativeX)))
-            if ((direction.y == 0) && (relativeY >= 0))
-            {
-                newInput = new Vector2Int(0, 1);
-            }
-            // down
-            else if ((direction.y == 0) && (relativeY < 0))
-            {
-                newInput = new Vector2Int(0, -1);
-            }
-            // right
-            else if ((direction.x == 0) && (relativeX >= 0))
-            {
-                newInput = new Vector2Int(1, 0);
-            }
-            // left
-            else
-            {
-                newInput = new Vector2Int(-1, 0);
+                // up
+                if ((direction.y == 0) && (relativeY >= 0))
+                {
+                    newInput = new Vector2Int(0, 1);
+                }
+                // down
+                else if ((direction.y == 0) && (relativeY < 0))
+                {
+                    newInput = new Vector2Int(0, -1);
+                }
+                // right
+                else if ((direction.x == 0) && (relativeX >= 0))
+                {
+                    newInput = new Vector2Int(1, 0);
+                }
+                // left
+                else
+                {
+                    newInput = new Vector2Int(-1, 0);
+                }
             }
         }
         
