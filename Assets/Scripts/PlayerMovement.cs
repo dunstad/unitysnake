@@ -40,7 +40,6 @@ public class PlayerMovement : MonoBehaviour
     // TODO: snap rotation after coroutine finishes
     // TODO: score display
     // TODO: screen shake
-    // TODO: fix not all touches changing direction
     // TODO: pause button for touch
     // TODO: fix music loop
     // TODO: death sound not playing (add game over overlay)
@@ -103,7 +102,6 @@ public class PlayerMovement : MonoBehaviour
         {
             if (Touchscreen.current.primaryTouch.touchId.ReadValue() != lastTouch)
             {
-                Debug.Log("TOUCHED!");
                 lastTouch = Touchscreen.current.primaryTouch.touchId.ReadValue();
                 var touchPosition = Touchscreen.current.position.ReadValue();
                 Vector3 touchWorldPos = cam.ScreenToWorldPoint(touchPosition);
@@ -112,17 +110,17 @@ public class PlayerMovement : MonoBehaviour
                 int relativeY = (int) (touchWorldPos.y - rb.position.y);
 
                 // up
-                if ((direction.y == 0) && (relativeY >= 0))
+                if ((lastInput.y == 0) && (relativeY >= 0))
                 {
                     newInput = new Vector2Int(0, 1);
                 }
                 // down
-                else if ((direction.y == 0) && (relativeY < 0))
+                else if ((lastInput.y == 0) && (relativeY < 0))
                 {
                     newInput = new Vector2Int(0, -1);
                 }
                 // right
-                else if ((direction.x == 0) && (relativeX >= 0))
+                else if ((lastInput.x == 0) && (relativeX >= 0))
                 {
                     newInput = new Vector2Int(1, 0);
                 }
