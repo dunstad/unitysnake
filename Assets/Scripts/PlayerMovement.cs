@@ -199,7 +199,7 @@ public class PlayerMovement : MonoBehaviour
     {
         lastTailPos = (Vector3) lastTailPos;
         lastTailPos.z += .01f;
-        GameObject newTail = Instantiate(tailPrefab, lastTailPos, lastRotation);
+        GameObject newTail = Instantiate(tailPrefab, lastTailPos, transform.rotation);
         // this prevents our tail colliding with the head during normal movement
         if (snake.Count == 1)
         {
