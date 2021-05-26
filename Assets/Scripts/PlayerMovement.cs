@@ -17,7 +17,7 @@ public class PlayerMovement : MonoBehaviour
     Vector2Int newInput;
     Vector2Int lastInput;
 
-    public List<GameObject> tail;
+    List<GameObject> snake;
     public GameObject tailPrefab;
 
     Vector3 lastTailPos;
@@ -52,7 +52,8 @@ public class PlayerMovement : MonoBehaviour
         direction.y = 0;
         lastInput = direction;
         lastTailPos = transform.position;
-        tail = new List<GameObject>();
+        snake = new List<GameObject>();
+        snake.Add(gameObject);
         inputs = new Queue<Vector2Int>();
         tickSeconds = .25f;
         moving = false;
@@ -75,7 +76,6 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // handle keyboard/gamepad input
-        // TODO: ignore inputs that go back into the tail (direction + input = 0)
         // up
         if (Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
@@ -174,18 +174,19 @@ public class PlayerMovement : MonoBehaviour
             if (moving)
             {
                 StopCoroutine(coroutine);
-                MovementCleanup(moveTargetPos, moveStartPositions);
+                MovementCleanup(moveStartPositions);
             }
-            moveTargetPos = rb.position + (Vector2) direction;
 
-            moveStartPositions = new Vector2[tail.Count + 1];
-            moveStartPositions[0] = rb.position;
-            for (var i = 1; i <= tail.Count; i++)
+            // first is future head position, last is previous tail position
+            moveStartPositions = new Vector2[snake.Count + 2];
+            moveStartPositions[0] = rb.position + (Vector2) direction;
+            for (var i = 0; i < snake.Count; i++)
             {
-                moveStartPositions[i] = tail[i - 1].GetComponent<Rigidbody2D>().position;
+                moveStartPositions[i + 1] = snake[i].GetComponent<Rigidbody2D>().position;
             }
+            moveStartPositions[moveStartPositions.Length - 1] = lastTailPos;
 
-            coroutine = Movement(moveStartPositions, moveTargetPos);
+            coroutine = Movement(moveStartPositions);
             timeSinceTick = 0f;
             StartCoroutine(coroutine);
         }
@@ -194,24 +195,7 @@ public class PlayerMovement : MonoBehaviour
             Die();
         }
 
-        // tail movement
-        // stop iterating one before the end, last piece moves to head position
-        if (tail.Count > 1)
-        {
-            for (var i = tail.Count - 1; i >= 1; i--)
-            {
-                // tail[i].transform.SetPositionAndRotation(tail[i-1].transform.position, tail[i-1].transform.rotation);
-            }
-        }
-        if (tail.Count > 0)
-        {
-            // tail[0].transform.SetPositionAndRotation(transform.position, transform.rotation);
-            lastTailPos = tail[tail.Count - 1].transform.position;
-        }
-        else 
-        {
-            lastTailPos = transform.position;
-        }
+        lastTailPos = snake[snake.Count - 1].transform.position;
     }
 
     public void LengthenTail()
@@ -219,12 +203,7 @@ public class PlayerMovement : MonoBehaviour
         lastTailPos = (Vector3) lastTailPos;
         lastTailPos.z += .01f;
         GameObject newTail = Instantiate(tailPrefab, lastTailPos, transform.rotation);
-        // this prevents our tail colliding with the head during normal movement
-        if (tail.Count == 0)
-        {
-            newTail.GetComponent<BoxCollider2D>().enabled = false;
-        }
-        tail.Add(newTail);
+        snake.Add(newTail);
         CancelInvoke();
         tickSeconds *= 0.95f;
         // don't actually know why tickSeconds / 2 is right
@@ -247,85 +226,82 @@ public class PlayerMovement : MonoBehaviour
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             deathSound.Play();
     }
-    IEnumerator Movement(Vector2[] startPositions, Vector2 end)
+    IEnumerator Movement(Vector2[] startPositions)
     {
         moving = true;
-        float sqrRemainingDistance = (rb.position - end).sqrMagnitude;
+        float sqrRemainingDistance = (rb.position - startPositions[0]).sqrMagnitude;
 
         while (sqrRemainingDistance > 0.01) {
             timeSinceTick += Time.deltaTime;
             var progress = timeSinceTick / tickSeconds;
-            for (var i = 0; i < startPositions.Length; i++)
+            for (var i = 0; i < startPositions.Length - 2; i++)
             {
-                Rigidbody2D body;
-                Vector2 target;
-                if (i == 0)
-                {
-                    body = rb;
-                    target = end;
-                }
-                else 
-                {
-                    body = tail[i-1].GetComponent<Rigidbody2D>();
-                    target = startPositions[i - 1];
-                }
-                Vector2 newPosition = Vector2.MoveTowards(startPositions[i], target, progress);
+                var body = snake[i].GetComponent<Rigidbody2D>();
+                var target = startPositions[i];
+                Vector2 newPosition = Vector2.MoveTowards(startPositions[i + 1], target, progress);
                 body.MovePosition(newPosition);
 
-                // rotation
-                float bodyRotation;
-                var direction = target - startPositions[i];
-                float oldRotation;
-                Vector2 oldDirection;
-                if (startPositions.Length == 1)
-                {
-                    oldDirection = new Vector2(1, 0);
-                } else if (i != startPositions.Length - 1)
-                {
-                    oldDirection = startPositions[i] - startPositions[i + 1];
-                } else
-                {
-                    oldDirection = startPositions[i - 1] - startPositions[i];
-                }
-
-                if (oldDirection != direction)
-                {
-                    if (direction.x != 0)
-                    {
-                        bodyRotation = direction.x * -90;
-                    } else
-                    {
-                        bodyRotation = direction.y * -90 + 90;
-                    }
-                    
-                    if (oldDirection == Vector2.Perpendicular(direction))
-                    {
-                        oldRotation = bodyRotation + 90;
-                    } else
-                    {
-                        oldRotation = bodyRotation - 90;
-                    }
-                    body.MoveRotation(Mathf.Lerp(oldRotation, bodyRotation, progress));
-                }
+                body.MoveRotation(CalculateRotation(startPositions[i], startPositions[i + 1], startPositions[i + 2], progress));
             }
-            sqrRemainingDistance = (rb.position - end).sqrMagnitude;
+            sqrRemainingDistance = (rb.position - startPositions[0]).sqrMagnitude;
             yield return null;
         }
-        MovementCleanup(end, startPositions);
+        MovementCleanup(startPositions);
     }
 
-    void MovementCleanup(Vector2 targetPos,  Vector2[] startPositions)
+    void MovementCleanup(Vector2[] startPositions)
     {
-        rb.position = targetPos;
-        if (tail.Count > 0)
+        for (var i = 0; i < snake.Count; i++)
         {
-            for (var i = 0; i < tail.Count; i++)
-            {
-                var tailBody = tail[i].GetComponent<Rigidbody2D>();
-                tailBody.position = startPositions[i];
-            }
+            var snakeRigidbody = snake[i].GetComponent<Rigidbody2D>();
+            snakeRigidbody.position = startPositions[i];
         }
         moving = false;
+    }
+
+    float CalculateRotation(Vector2 frontPos, Vector2 midPos, Vector2 backPos, float progress)
+    {
+        float bodyRotation;
+        var direction = frontPos - midPos;
+        float oldRotation;
+        var oldDirection = midPos - backPos;
+        float result;
+
+        if (oldDirection != direction)
+        {
+            if (direction.x != 0)
+            {
+                bodyRotation = direction.x * -90;
+            } else
+            {
+                bodyRotation = direction.y * -90 + 90;
+            }
+            
+            if (oldDirection == Vector2.Perpendicular(direction))
+            {
+                oldRotation = bodyRotation + 90;
+            } else
+            {
+                oldRotation = bodyRotation - 90;
+            }
+            result = Mathf.Lerp(oldRotation, bodyRotation, progress);
+        } else
+        {
+            if (direction == Vector2.up)
+            {
+                result = 0;
+            } else if (direction == Vector2.right)
+            {
+                result = -90;
+            } else if (direction == Vector2.down)
+            {
+                result = 180;
+            } else
+            {
+                result = 90;
+            }
+        }
+        return result;
     }
 }
 
