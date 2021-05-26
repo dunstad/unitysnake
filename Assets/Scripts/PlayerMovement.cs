@@ -36,13 +36,11 @@ public class PlayerMovement : MonoBehaviour
     public ParticleSystem dustParticles;
     int lastTouch;
 
-    // TODO: fix last tail segment rotation
-    // TODO: snap rotation after coroutine finishes
-    // TODO: score display
     // TODO: screen shake
     // TODO: pause button for touch (two finger tap to pause?)
+    // TODO: add game over overlay
+    // TODO: score display
     // TODO: fix music loop
-    // TODO: death sound not playing (add game over overlay)
 
     // Start is called before the first frame update
     void Start()
@@ -51,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
         direction.x = 0;
         direction.y = 0;
         lastInput = direction;
-        lastTailPos = transform.position;
+        lastTailPos = transform.position + new Vector3(0, -1, 0);
         snake = new List<GameObject>();
         snake.Add(gameObject);
         inputs = new Queue<Vector2Int>();
@@ -185,6 +183,7 @@ public class PlayerMovement : MonoBehaviour
                 moveStartPositions[i + 1] = snake[i].GetComponent<Rigidbody2D>().position;
             }
             moveStartPositions[moveStartPositions.Length - 1] = lastTailPos;
+            lastTailPos = moveStartPositions[moveStartPositions.Length - 2];
 
             coroutine = Movement(moveStartPositions);
             timeSinceTick = 0f;
@@ -194,15 +193,18 @@ public class PlayerMovement : MonoBehaviour
         {
             Die();
         }
-
-        lastTailPos = snake[snake.Count - 1].transform.position;
     }
 
     public void LengthenTail()
     {
         lastTailPos = (Vector3) lastTailPos;
         lastTailPos.z += .01f;
-        GameObject newTail = Instantiate(tailPrefab, lastTailPos, transform.rotation);
+        GameObject newTail = Instantiate(tailPrefab, lastTailPos, lastRotation);
+        // this prevents our tail colliding with the head during normal movement
+        if (snake.Count == 1)
+        {
+            newTail.GetComponent<BoxCollider2D>().enabled = false;
+        }
         snake.Add(newTail);
         CancelInvoke();
         tickSeconds *= 0.95f;
@@ -219,12 +221,17 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    void Restart()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
     void Die()
     {
-            Debug.Log("u ded");
-            Destroy(gameObject);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            deathSound.Play();
+        Debug.Log("u ded");
+        deathSound.Play();
+        CancelInvoke();
+        Invoke("Restart", 1);
     }
     IEnumerator Movement(Vector2[] startPositions)
     {
@@ -251,10 +258,11 @@ public class PlayerMovement : MonoBehaviour
 
     void MovementCleanup(Vector2[] startPositions)
     {
-        for (var i = 0; i < snake.Count; i++)
+        for (var i = 0; i < startPositions.Length - 2; i++)
         {
             var snakeRigidbody = snake[i].GetComponent<Rigidbody2D>();
             snakeRigidbody.position = startPositions[i];
+            snakeRigidbody.MoveRotation(CalculateRotation(startPositions[i], startPositions[i + 1], startPositions[i + 2], 1));
         }
         moving = false;
     }
@@ -267,7 +275,11 @@ public class PlayerMovement : MonoBehaviour
         var oldDirection = midPos - backPos;
         float result;
 
-        if (oldDirection != direction)
+        // only when the game starts
+        if (direction == new Vector2(0, 0))
+        {
+            result = 0;
+        } else if (oldDirection != direction)
         {
             if (direction.x != 0)
             {
