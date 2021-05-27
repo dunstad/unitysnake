@@ -95,7 +95,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Handle screen touches.
-        if (Touchscreen.current.primaryTouch.startTime.ReadValue() >= Time.time)
+        if (Touchscreen.current.primaryTouch.isInProgress)
         {
             if (Touchscreen.current.primaryTouch.touchId.ReadValue() != lastTouch)
             {
