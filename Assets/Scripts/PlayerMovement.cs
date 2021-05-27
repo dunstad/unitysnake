@@ -49,7 +49,7 @@ public class PlayerMovement : MonoBehaviour
         cam = Camera.main;
         direction.x = 0;
         direction.y = 0;
-        lastInput = direction;
+        lastInput = new Vector2Int(0, 1);
         lastTailPos = transform.position + new Vector3(0, -1, 0);
         inputs = new Queue<Vector2Int>();
         tickSeconds = .25f;

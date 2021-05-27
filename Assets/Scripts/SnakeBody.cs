@@ -27,7 +27,7 @@ public class SnakeBody : MonoBehaviour
     {
         while (true) {
             var change = (Mathf.Sin(Time.time) / 2f) / 1000f;
-            gameObject.GetComponent<Rigidbody2D>().position += new Vector(change, 0);
+            gameObject.GetComponent<Rigidbody2D>().position += new Vector2(change, 0);
             yield return null;
         }
     }
