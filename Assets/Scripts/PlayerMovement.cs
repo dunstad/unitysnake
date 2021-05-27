@@ -17,7 +17,7 @@ public class PlayerMovement : MonoBehaviour
     Vector2Int newInput;
     Vector2Int lastInput;
 
-    List<GameObject> snake;
+    public List<GameObject> snake;
     public GameObject tailPrefab;
 
     Vector3 lastTailPos;
@@ -37,7 +37,6 @@ public class PlayerMovement : MonoBehaviour
     int lastTouch;
 
     // TODO: ignore touches that have ended
-    // TODO: start with a short tail
     // TODO: screen shake
     // TODO: pause button for touch (two finger tap to pause?)
     // TODO: add game over overlay
@@ -52,8 +51,6 @@ public class PlayerMovement : MonoBehaviour
         direction.y = 0;
         lastInput = direction;
         lastTailPos = transform.position + new Vector3(0, -1, 0);
-        snake = new List<GameObject>();
-        snake.Add(gameObject);
         inputs = new Queue<Vector2Int>();
         tickSeconds = .25f;
         moving = false;
@@ -144,56 +141,59 @@ public class PlayerMovement : MonoBehaviour
 
     void MoveSnake()
     {
-        // head movement
-        if (inputs.Count != 0)
-        {
-            direction = inputs.Dequeue();
-            var particlePos = transform.position;
-            particlePos.z += .005f;
-            dustParticles.gameObject.transform.position = particlePos;
-            int dustRotation;
-            if (direction.y != 0)
+        // if the player has decided to start moving
+        if ((direction != -direction) || (inputs.Count > 0)) {
+            // head movement
+            if (inputs.Count != 0)
             {
-                dustRotation = direction.y * 90;
-            } else
-            {
-                dustRotation = direction.x * 90 + 90;
+                direction = inputs.Dequeue();
+                var particlePos = transform.position;
+                particlePos.z += .005f;
+                dustParticles.gameObject.transform.position = particlePos;
+                int dustRotation;
+                if (direction.y != 0)
+                {
+                    dustRotation = direction.y * 90;
+                } else
+                {
+                    dustRotation = direction.x * 90 + 90;
+                }
+                dustParticles.transform.eulerAngles = new Vector3(dustRotation, 90, 90);
+                dustParticles.Play();
             }
-            dustParticles.transform.eulerAngles = new Vector3(dustRotation, 90, 90);
-            dustParticles.Play();
-        }
-        var nextPos = new Vector3Int();
-        nextPos.x = (int) Math.Floor(rb.position.x) + direction.x;
-        nextPos.y = (int) Math.Floor(rb.position.y) + direction.y;
-        nextPos.z = 0;
-        
-        // wall collision and death
-        Sprite? sprite = collidable.GetSprite(nextPos);
-        if (sprite is null)
-        {
-            if (moving)
+            var nextPos = new Vector3Int();
+            nextPos.x = (int) Math.Floor(rb.position.x) + direction.x;
+            nextPos.y = (int) Math.Floor(rb.position.y) + direction.y;
+            nextPos.z = 0;
+            
+            // wall collision and death
+            Sprite? sprite = collidable.GetSprite(nextPos);
+            if (sprite is null)
             {
-                StopCoroutine(coroutine);
-                MovementCleanup(moveStartPositions);
-            }
+                if (moving)
+                {
+                    StopCoroutine(coroutine);
+                    MovementCleanup(moveStartPositions);
+                }
 
-            // first is future head position, last is previous tail position
-            moveStartPositions = new Vector2[snake.Count + 2];
-            moveStartPositions[0] = rb.position + (Vector2) direction;
-            for (var i = 0; i < snake.Count; i++)
-            {
-                moveStartPositions[i + 1] = snake[i].GetComponent<Rigidbody2D>().position;
-            }
-            moveStartPositions[moveStartPositions.Length - 1] = lastTailPos;
-            lastTailPos = moveStartPositions[moveStartPositions.Length - 2];
+                // first is future head position, last is previous tail position
+                moveStartPositions = new Vector2[snake.Count + 2];
+                moveStartPositions[0] = rb.position + (Vector2) direction;
+                for (var i = 0; i < snake.Count; i++)
+                {
+                    moveStartPositions[i + 1] = snake[i].GetComponent<Rigidbody2D>().position;
+                }
+                moveStartPositions[moveStartPositions.Length - 1] = lastTailPos;
+                lastTailPos = moveStartPositions[moveStartPositions.Length - 2];
 
-            coroutine = Movement(moveStartPositions);
-            timeSinceTick = 0f;
-            StartCoroutine(coroutine);
-        }
-        else
-        {
-            Die();
+                coroutine = Movement(moveStartPositions);
+                timeSinceTick = 0f;
+                StartCoroutine(coroutine);
+            }
+            else
+            {
+                Die();
+            }
         }
     }
 
@@ -202,11 +202,6 @@ public class PlayerMovement : MonoBehaviour
         lastTailPos = (Vector3) lastTailPos;
         lastTailPos.z += .01f;
         GameObject newTail = Instantiate(tailPrefab, lastTailPos, transform.rotation);
-        // this prevents our tail colliding with the head during normal movement
-        if (snake.Count == 1)
-        {
-            newTail.GetComponent<BoxCollider2D>().enabled = false;
-        }
         snake.Add(newTail);
         CancelInvoke();
         tickSeconds *= 0.95f;
