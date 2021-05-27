@@ -11,9 +11,12 @@ public class FoodCollider : MonoBehaviour
     List<Vector2> locations;
     public AudioSource sound;
     public ParticleSystem particles;
+    IEnumerator animate;
+    bool hasCollided;
 
     void Start()
     {
+        hasCollided = false;
         locations = new List<Vector2>();
         for (int i = walkable.origin.x; i < walkable.origin.x + walkable.size.x; i++)
         {
@@ -26,20 +29,30 @@ public class FoodCollider : MonoBehaviour
                 }
             }
         }
-        StartCoroutine(Animate());
+        animate = Animate();
+        StartCoroutine(animate);
+        StartCoroutine(Appear());
     }
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        particles.gameObject.transform.position = transform.position;
-        var newLocation = locations[Random.Range(0, locations.Count - 1)];
-        transform.SetPositionAndRotation(new Vector3(newLocation.x + .5f, newLocation.y + .5f, -1), transform.rotation);
-        if (col.GetComponent<PlayerMovement>())
+        // ghost stars fixed?
+        // probably needed because we're cloning this gameObject
+        if (!hasCollided)
         {
-            col.GetComponent<PlayerMovement>().LengthenTail();
-            sound.time = 0.1f;
-            sound.Play();
-            particles.Play();
+            hasCollided = true;
+            particles.gameObject.transform.position = transform.position;
+            var newLocation = locations[Random.Range(0, locations.Count - 1)];
+            var newPos = new Vector3(newLocation.x + .5f, newLocation.y + .5f, -1);
+            Instantiate(gameObject, newPos, transform.rotation);
+            if (col.GetComponent<PlayerMovement>())
+            {
+                col.GetComponent<PlayerMovement>().LengthenTail();
+                sound.time = 0.1f;
+                sound.Play();
+                particles.Play();
+            }
+            StartCoroutine(Die());
         }
     }
 
@@ -51,5 +64,43 @@ public class FoodCollider : MonoBehaviour
             transform.localScale = new Vector3(newScale, newScale, newScale);
             yield return null;
         }
+    }
+
+    IEnumerator Appear()
+    {
+        var alpha = 0f;
+        while (alpha < 1f) {
+            alpha += .01f;
+            var newColor = new Color(1, 1, 1, alpha);
+            gameObject.GetComponent<Renderer>().material.color = newColor;
+            transform.GetChild(0).GetComponent<Renderer>().material.color = newColor;
+            yield return null;
+        }
+    }
+
+    IEnumerator Die()
+    {
+        gameObject.GetComponent<BoxCollider2D>().enabled = false;
+        // so the new star's light doesn't overwrite the current one
+        transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - .1f);
+        StopCoroutine(animate);
+        var alpha = 1f;
+        // thanks to Animate, current scale varies
+        // this shrinks from any scale in the same amount of time
+        var scale = transform.localScale.x;
+        var scaleStep = scale / 50;
+        while (scale > 0) {
+            if (alpha > 0)
+            {
+                alpha -= .02f;
+                var newColor = new Color(1, 1, 1, alpha);
+                transform.GetChild(0).GetComponent<Renderer>().material.color = newColor;
+            }
+            
+            scale -= scaleStep;
+            transform.localScale = new Vector3(scale, scale, scale);
+            yield return null;
+        }
+        Destroy(gameObject);
     }
 }
