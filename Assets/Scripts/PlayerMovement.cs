@@ -37,7 +37,6 @@ public class PlayerMovement : MonoBehaviour
     int lastTouch;
 
     // TODO: ignore touches that have ended
-    // TODO: fade in tail segments
     // TODO: start with a short tail
     // TODO: screen shake
     // TODO: pause button for touch (two finger tap to pause?)
