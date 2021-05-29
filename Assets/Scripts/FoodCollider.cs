@@ -7,25 +7,30 @@ using UnityEngine.Tilemaps;
 // TODO: rebuild locations every move
 public class FoodCollider : MonoBehaviour
 {
-    public Tilemap walkable;
+    public Tilemap? walkable;
     List<Vector2> locations;
     public AudioSource sound;
     public ParticleSystem particles;
     IEnumerator animate;
     bool hasCollided;
+    float originalScale;
 
     void Start()
     {
+        originalScale = transform.localScale.x;
         hasCollided = false;
-        locations = new List<Vector2>();
-        for (int i = walkable.origin.x; i < walkable.origin.x + walkable.size.x; i++)
+        if (walkable != null)
         {
-            for (int j = walkable.origin.y; j < walkable.origin.y + walkable.size.y; j++)
+            locations = new List<Vector2>();
+            for (int i = walkable.origin.x; i < walkable.origin.x + walkable.size.x; i++)
             {
-                Sprite? sprite = walkable.GetSprite(new Vector3Int (i, j, 0));
-                if (sprite != null)
+                for (int j = walkable.origin.y; j < walkable.origin.y + walkable.size.y; j++)
                 {
-                    locations.Add(new Vector2(i, j));
+                    Sprite? sprite = walkable.GetSprite(new Vector3Int (i, j, 0));
+                    if (sprite != null)
+                    {
+                        locations.Add(new Vector2(i, j));
+                    }
                 }
             }
         }
@@ -44,6 +49,7 @@ public class FoodCollider : MonoBehaviour
             particles.gameObject.transform.position = transform.position;
             var newLocation = locations[Random.Range(0, locations.Count - 1)];
             var newPos = new Vector3(newLocation.x + .5f, newLocation.y + .5f, -1);
+            transform.localScale = new Vector3(originalScale, originalScale, originalScale);
             Instantiate(gameObject, newPos, transform.rotation);
             if (col.GetComponent<PlayerMovement>())
             {
@@ -60,7 +66,7 @@ public class FoodCollider : MonoBehaviour
     {
         while (true) {
             transform.Rotate(new Vector3(0, 0, Mathf.Sin(Time.time) / 2));
-            var newScale = 1 * ((Mathf.Sin(Time.time) / 2) + 1.25f);
+            var newScale = originalScale * ((Mathf.Sin(Time.time) / 2) + 1.25f);
             transform.localScale = new Vector3(newScale, newScale, newScale);
             yield return null;
         }
