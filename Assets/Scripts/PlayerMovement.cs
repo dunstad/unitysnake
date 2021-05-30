@@ -10,7 +10,6 @@ using UnityEngine.SceneManagement;
 public class PlayerMovement : MonoBehaviour
 {
     Vector2Int direction;
-    Vector2 moveTargetPos;
     public Rigidbody2D rb;
     public Tilemap collidable;
     Queue<Vector2Int> inputs;
@@ -36,7 +35,6 @@ public class PlayerMovement : MonoBehaviour
     public ParticleSystem dustParticles;
     int lastTouch;
 
-    // TODO: ignore touches that have ended
     // TODO: pause button for touch (two finger tap to pause?)
     // TODO: add game over overlay
     // TODO: score display

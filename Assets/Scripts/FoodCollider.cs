@@ -14,6 +14,7 @@ public class FoodCollider : MonoBehaviour
     IEnumerator animate;
     bool hasCollided;
     float originalScale;
+    public GameObject explosionPrefab;
 
     void Start()
     {
@@ -86,6 +87,7 @@ public class FoodCollider : MonoBehaviour
 
     IEnumerator Die()
     {
+        Instantiate(explosionPrefab, transform.position, transform.rotation);
         gameObject.GetComponent<BoxCollider2D>().enabled = false;
         // so the new star's light doesn't overwrite the current one
         transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - .1f);
