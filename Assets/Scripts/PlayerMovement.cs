@@ -37,7 +37,6 @@ public class PlayerMovement : MonoBehaviour
     int lastTouch;
 
     // TODO: ignore touches that have ended
-    // TODO: screen shake
     // TODO: pause button for touch (two finger tap to pause?)
     // TODO: add game over overlay
     // TODO: score display
@@ -199,6 +198,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void LengthenTail()
     {
+        cam.GetComponent<CameraShake>().Shake(.25f, .25f);
         lastTailPos = (Vector3) lastTailPos;
         lastTailPos.z += .01f;
         GameObject newTail = Instantiate(tailPrefab, lastTailPos, transform.rotation);
