@@ -5,18 +5,22 @@ using UnityEngine;
 public class Explosion : MonoBehaviour
 {
     float startingScale;
+    Camera cam;
 
     // Start is called before the first frame update
     void Start()
     {
-        startingScale = transform.localScale.x;
-        StartCoroutine(Animate());
     }
 
-    IEnumerator Animate()
+    public IEnumerator Explode(float tickSeconds)
     {
+        cam = Camera.main;
+        startingScale = transform.localScale.x;
+        var tickDifference = .2f - tickSeconds;
+        Debug.Log(tickDifference);
+        cam.GetComponent<CameraShake>().Shake(.25f + tickDifference, .25f + tickDifference);
         var scale = startingScale;
-        while (scale < 5) {
+        while (scale < 5 + (tickDifference * 40)) {
             scale *= 1.2f;
             transform.localScale = new Vector3(scale, scale, scale);
             yield return null;

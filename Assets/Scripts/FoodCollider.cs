@@ -42,7 +42,6 @@ public class FoodCollider : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        // ghost stars fixed?
         // probably needed because we're cloning this gameObject
         if (!hasCollided)
         {
@@ -52,14 +51,20 @@ public class FoodCollider : MonoBehaviour
             var newPos = new Vector3(newLocation.x + .5f, newLocation.y + .5f, -1);
             transform.localScale = new Vector3(originalScale, originalScale, originalScale);
             Instantiate(gameObject, newPos, transform.rotation);
-            if (col.GetComponent<PlayerMovement>())
+            var playerMovement = col.GetComponent<PlayerMovement>();
+            if (playerMovement)
             {
-                col.GetComponent<PlayerMovement>().LengthenTail();
+                playerMovement.LengthenTail();
                 sound.time = 0.1f;
                 sound.Play();
                 particles.Play();
+                StartCoroutine(Die(playerMovement.tickSeconds));
             }
-            StartCoroutine(Die());
+            // for when the food spawns on top of the tail
+            else
+            {
+                Destroy(gameObject);
+            }
         }
     }
 
@@ -85,9 +90,10 @@ public class FoodCollider : MonoBehaviour
         }
     }
 
-    IEnumerator Die()
+    IEnumerator Die(float tickSeconds)
     {
-        Instantiate(explosionPrefab, transform.position, transform.rotation);
+        var explosion = Instantiate(explosionPrefab, transform.position, transform.rotation);
+        StartCoroutine(explosion.GetComponent<Explosion>().Explode(tickSeconds));
         gameObject.GetComponent<BoxCollider2D>().enabled = false;
         // so the new star's light doesn't overwrite the current one
         transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - .1f);

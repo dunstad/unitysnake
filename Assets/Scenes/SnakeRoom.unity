@@ -13702,6 +13702,7 @@ MonoBehaviour:
   - {fileID: 586249303}
   - {fileID: 1532553222}
   tailPrefab: {fileID: 1668624988959835546, guid: b48fd969aacc1da48949b5d8952ea469, type: 3}
+  tickSeconds: 0
   deathSound: {fileID: 1210101811}
   inputSound: {fileID: 1781126240}
   dustParticles: {fileID: 540824932}
@@ -19724,7 +19725,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: ac321bb2d48c4c345a79dbeab0cdfe17, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.05
+  m_Volume: 0.1
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -20010,7 +20011,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: d7d963eef38e09c42b36a5303561f77c, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -25523,7 +25524,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: b40c517b676a92f4c93ad3452ae91279, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 0.1
+  m_Volume: 0.2
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -25750,6 +25751,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1458668151658879873, guid: b3c60db7eb6e7c44399527d92e58a817, type: 3}
+      propertyPath: m_Volume
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 1458668151658879883, guid: b3c60db7eb6e7c44399527d92e58a817, type: 3}
       propertyPath: m_Name
       value: Food

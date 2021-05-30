@@ -23,7 +23,8 @@ public class PlayerMovement : MonoBehaviour
 
     Camera cam;
 
-    float tickSeconds;
+    // used by Explosion to determine radius and shake strength
+    public float tickSeconds;
     float timeSinceTick;
 
     bool moving;
@@ -35,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
     public ParticleSystem dustParticles;
     int lastTouch;
 
+    // TODO: relaxed and fast mode
     // TODO: pause button for touch (two finger tap to pause?)
     // TODO: add game over overlay
     // TODO: score display
@@ -49,7 +51,7 @@ public class PlayerMovement : MonoBehaviour
         lastInput = new Vector2Int(0, 1);
         lastTailPos = transform.position + new Vector3(0, -1, 0);
         inputs = new Queue<Vector2Int>();
-        tickSeconds = .25f;
+        tickSeconds = .2f;
         moving = false;
         moveStartPositions = new Vector2[1];
         moveStartPositions[0] = rb.position;
@@ -196,13 +198,12 @@ public class PlayerMovement : MonoBehaviour
 
     public void LengthenTail()
     {
-        cam.GetComponent<CameraShake>().Shake(.25f, .25f);
         lastTailPos = (Vector3) lastTailPos;
         lastTailPos.z += .01f;
         GameObject newTail = Instantiate(tailPrefab, lastTailPos, transform.rotation);
         snake.Add(newTail);
         CancelInvoke();
-        tickSeconds *= 0.95f;
+        tickSeconds *= 0.975f;
         // don't actually know why tickSeconds / 2 is right
         // it stops the pausing on food pickup though
         InvokeRepeating("MoveSnake", tickSeconds / 2, tickSeconds);
