@@ -17,7 +17,6 @@ public class Explosion : MonoBehaviour
         cam = Camera.main;
         startingScale = transform.localScale.x;
         var tickDifference = .2f - tickSeconds;
-        Debug.Log(tickDifference);
         cam.GetComponent<CameraShake>().Shake(.25f + tickDifference, .25f + tickDifference);
         var scale = startingScale;
         while (scale < 5 + (tickDifference * 40)) {
