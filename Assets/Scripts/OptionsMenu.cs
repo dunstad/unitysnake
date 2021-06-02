@@ -4,15 +4,13 @@ using UnityEngine;
 
 public class OptionsMenu : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public void SetExplosions(bool explosions)
     {
-        
+        Debug.Log("explosions" + explosions);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SetRelaxedMode(bool relaxedMode)
     {
-        
+        Debug.Log("relaxed" + relaxedMode);
     }
 }
