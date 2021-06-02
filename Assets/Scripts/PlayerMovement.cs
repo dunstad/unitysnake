@@ -102,8 +102,8 @@ public class PlayerMovement : MonoBehaviour
                 var touchPosition = Touchscreen.current.position.ReadValue();
                 Vector3 touchWorldPos = cam.ScreenToWorldPoint(touchPosition);
 
-                int relativeX = (int) (touchWorldPos.x - rb.position.x);
-                int relativeY = (int) (touchWorldPos.y - rb.position.y);
+                float relativeX = touchWorldPos.x - rb.position.x;
+                float relativeY = touchWorldPos.y - rb.position.y;
 
                 // up
                 if ((lastInput.y == 0) && (relativeY >= 0))
