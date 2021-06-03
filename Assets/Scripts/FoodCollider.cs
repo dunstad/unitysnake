@@ -15,9 +15,11 @@ public class FoodCollider : MonoBehaviour
     bool hasCollided;
     float originalScale;
     public GameObject explosionPrefab;
+    bool explosions;
 
     void Start()
     {
+        explosions = PlayerPrefs.GetInt("explosions", 1) == 0 ? false : true;
         originalScale = transform.localScale.x;
         hasCollided = false;
         if (walkable != null)
@@ -92,8 +94,11 @@ public class FoodCollider : MonoBehaviour
 
     IEnumerator Die(float tickSeconds)
     {
-        var explosion = Instantiate(explosionPrefab, transform.position, transform.rotation);
-        StartCoroutine(explosion.GetComponent<Explosion>().Explode(tickSeconds));
+        if (explosions)
+        {
+            var explosion = Instantiate(explosionPrefab, transform.position, transform.rotation);
+            StartCoroutine(explosion.GetComponent<Explosion>().Explode(tickSeconds));
+        }
         gameObject.GetComponent<BoxCollider2D>().enabled = false;
         // so the new star's light doesn't overwrite the current one
         transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - .1f);

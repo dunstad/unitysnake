@@ -36,6 +36,8 @@ public class PlayerMovement : MonoBehaviour
     public ParticleSystem dustParticles;
     int lastTouch;
 
+    bool relaxedMode;
+
     // TODO: relaxed and fast mode
     // TODO: pause button for touch (two finger tap to pause?)
     // TODO: add game over overlay
@@ -56,6 +58,7 @@ public class PlayerMovement : MonoBehaviour
         moveStartPositions = new Vector2[1];
         moveStartPositions[0] = rb.position;
         InvokeRepeating("MoveSnake", .5f, tickSeconds);
+        relaxedMode = PlayerPrefs.GetInt("relaxedMode", 0) == 0 ? false : true;
     }
 
     // Update is called once per frame
@@ -202,11 +205,14 @@ public class PlayerMovement : MonoBehaviour
         lastTailPos.z += .01f;
         GameObject newTail = Instantiate(tailPrefab, lastTailPos, transform.rotation);
         snake.Add(newTail);
-        CancelInvoke();
-        tickSeconds *= 0.975f;
-        // don't actually know why tickSeconds / 2 is right
-        // it stops the pausing on food pickup though
-        InvokeRepeating("MoveSnake", tickSeconds / 2, tickSeconds);
+        if (!relaxedMode)
+        {
+            CancelInvoke();
+            tickSeconds *= 0.975f;
+            // don't actually know why tickSeconds / 2 is right
+            // it stops the pausing on food pickup though
+            InvokeRepeating("MoveSnake", tickSeconds / 2, tickSeconds);
+        }
     }
 
     void OnTriggerEnter2D(Collider2D col)
