@@ -6,11 +6,13 @@ public class OptionsMenu : MonoBehaviour
 {
     public void SetExplosions(bool explosions)
     {
-        Debug.Log("explosions" + explosions);
+        int explosionInt = explosions ? 1 : 0;
+        PlayerPrefs.SetInt("explosions", explosionInt);
     }
 
     public void SetRelaxedMode(bool relaxedMode)
     {
-        Debug.Log("relaxed" + relaxedMode);
+        int relaxedModeInt = relaxedMode ? 1 : 0;
+        PlayerPrefs.SetInt("relaxedMode", relaxedModeInt);
     }
 }
